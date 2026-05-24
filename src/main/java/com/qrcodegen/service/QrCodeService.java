@@ -50,7 +50,7 @@ public class QrCodeService {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(matrix, "PNG", stream);
             return stream.toByteArray();
-        } catch (WriterException | IOException e) {
+        } catch (WriterException | IOException | IllegalArgumentException e) {
             throw new RuntimeException("Failed to generate QR code", e);
         }
     }
