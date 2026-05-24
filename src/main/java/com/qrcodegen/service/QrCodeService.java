@@ -2,7 +2,6 @@ package com.qrcodegen.service;
 
 import com.qrcodegen.model.QrCode;
 import com.qrcodegen.repository.QrCodeRepository;
-import net.glxn.qrgen.javase.QRCode;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -42,7 +41,7 @@ public class QrCodeService {
      * Generates a QR code image as a PNG byte array for the given content.
      */
     public byte[] generateQrCodeImage(String content, int width, int height) {
-        ByteArrayOutputStream stream = QRCode.from(content)
+        ByteArrayOutputStream stream = net.glxn.qrgen.javase.QRCode.from(content)
                 .withSize(width, height)
                 .stream();
         return stream.toByteArray();
