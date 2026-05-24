@@ -35,11 +35,16 @@
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
-        <!-- QR Code generation -->
+        <!-- QR Code generation (ZXing — same engine QRGen wraps) -->
         <dependency>
-            <groupId>com.github.kenglxn.QRGen</groupId>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
             <artifactId>javase</artifactId>
-            <version>3.0.1</version>
+            <version>3.5.3</version>
         </dependency>
 
         <!-- Lombok -->

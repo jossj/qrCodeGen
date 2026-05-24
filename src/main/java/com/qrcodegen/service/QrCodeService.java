@@ -1,10 +1,16 @@
 package com.qrcodegen.service;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.qrcodegen.model.QrCode;
 import com.qrcodegen.repository.QrCodeRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,13 +43,15 @@ public class QrCodeService {
         repository.deleteById(id);
     }
 
-    /**
-     * Generates a QR code image as a PNG byte array for the given content.
-     */
     public byte[] generateQrCodeImage(String content, int width, int height) {
-        ByteArrayOutputStream stream = net.glxn.qrgen.javase.QRCode.from(content)
-                .withSize(width, height)
-                .stream();
-        return stream.toByteArray();
+        try {
+            QRCodeWriter writer = new QRCodeWriter();
+            BitMatrix matrix = writer.encode(content, BarcodeFormat.QR_CODE, width, height);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(matrix, "PNG", stream);
+            return stream.toByteArray();
+        } catch (WriterException | IOException e) {
+            throw new RuntimeException("Failed to generate QR code", e);
+        }
     }
 }
