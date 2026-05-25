@@ -1,19 +1,18 @@
-package com.qrcodegen;
+package com.qrcodegen.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 
-@SpringBootApplication(exclude = {
+@Configuration
+@Profile("!no-mongo")
+@Import({
         MongoAutoConfiguration.class,
         MongoDataAutoConfiguration.class,
         MongoRepositoriesAutoConfiguration.class
 })
-public class QrCodeGenApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(QrCodeGenApplication.class, args);
-    }
+public class MongoConfig {
 }
