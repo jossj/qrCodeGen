@@ -16,7 +16,7 @@
     <artifactId>qr-code-gen</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>qr-code-gen</name>
-    <description>QR Code Generator with REST API and MongoDB</description>
+    <description>QR Code Generator with REST API</description>
 
     <properties>
         <java.version>17</java.version>
@@ -27,12 +27,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <!-- Spring Data MongoDB -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
         <!-- QR Code generation -->
