@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface QrCodeRepository extends JpaRepository<QrCode, String> {
 
-    List<QrCode> findByLabel(String label);
+    List<QrCode> findByChildName(String childName);
+
+    List<QrCode> findByBehaviour(String behaviour);
 }

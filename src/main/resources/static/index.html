@@ -169,7 +169,7 @@
 
   <!-- Upload card -->
   <div class="upload-card">
-    <h2>Upload a spreadsheet containing <strong>Student Name</strong> and <strong>BehaviourType</strong> columns</h2>
+    <h2>Upload a spreadsheet containing <strong>Child Name</strong> and <strong>Behaviour</strong> columns</h2>
 
     <div class="upload-area" id="uploadArea">
       <div class="upload-icon">&#128196;</div>
@@ -293,9 +293,9 @@
       const card = document.createElement('div');
       card.className = 'qr-card';
       card.innerHTML = `
-        <img src="data:image/png;base64,${s.qrCodeBase64}" alt="QR code for ${esc(s.studentName)}" />
-        <div class="student-name">${esc(s.studentName)}</div>
-        <span class="badge">${esc(s.behaviourType)}</span>
+        <img src="data:image/png;base64,${s.qrCodeBase64}" alt="QR code for ${esc(s.childName)}" />
+        <div class="student-name">${esc(s.childName)}</div>
+        <span class="badge">${esc(s.behaviour)}</span>
       `;
       qrGrid.appendChild(card);
     });

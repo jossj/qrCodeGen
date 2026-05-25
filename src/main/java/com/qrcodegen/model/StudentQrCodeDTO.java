@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentQrCodeDTO {
-    private String studentName;
-    private String behaviourType;
+    private String childName;
+    private String behaviour;
     private String qrCodeBase64;
 }

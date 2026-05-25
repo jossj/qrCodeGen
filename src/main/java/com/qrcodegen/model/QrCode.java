@@ -20,10 +20,20 @@ public class QrCode {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(name = "child_name", nullable = false)
+    private String childName;
+
+    @Column(nullable = false)
+    private String behaviour;
+
+    @Column(nullable = false)
     private String content;
-    private String label;
-    private int width;
-    private int height;
+
+    @Builder.Default
+    private int width = 250;
+
+    @Builder.Default
+    private int height = 250;
 
     @Column(name = "created_at")
     @Builder.Default

@@ -1,5 +1,6 @@
 package com.qrcodegen.controller;
 
+import com.qrcodegen.model.QrCode;
 import com.qrcodegen.model.StudentQrCodeDTO;
 import com.qrcodegen.service.QrCodeService;
 import org.apache.poi.ss.usermodel.*;
@@ -37,9 +38,9 @@ public class DashboardController {
             int nameCol = -1, behaviourCol = -1;
             for (Cell cell : headerRow) {
                 String header = cell.getStringCellValue().trim().toLowerCase().replaceAll("\\s+", " ");
-                if (header.equals("student name")) {
+                if (header.equals("child name") || header.equals("student name")) {
                     nameCol = cell.getColumnIndex();
-                } else if (header.equals("behaviourtype") || header.equals("behaviour type")) {
+                } else if (header.equals("behaviour") || header.equals("behaviourtype") || header.equals("behaviour type")) {
                     behaviourCol = cell.getColumnIndex();
                 }
             }
@@ -52,15 +53,24 @@ public class DashboardController {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                String studentName = getCellValue(row.getCell(nameCol));
-                String behaviourType = getCellValue(row.getCell(behaviourCol));
-                if (studentName.isBlank() && behaviourType.isBlank()) continue;
+                String childName  = getCellValue(row.getCell(nameCol));
+                String behaviour  = getCellValue(row.getCell(behaviourCol));
+                if (childName.isBlank() && behaviour.isBlank()) continue;
 
-                String qrContent = "Student Name: " + studentName + "\nBehaviourType: " + behaviourType;
+                String qrContent = "Child Name: " + childName + "\nBehaviour: " + behaviour;
                 byte[] imageBytes = qrCodeService.generateQrCodeImage(qrContent, 200, 200);
                 String base64 = Base64.getEncoder().encodeToString(imageBytes);
 
-                results.add(new StudentQrCodeDTO(studentName, behaviourType, base64));
+                QrCode record = QrCode.builder()
+                        .childName(childName)
+                        .behaviour(behaviour)
+                        .content(qrContent)
+                        .width(200)
+                        .height(200)
+                        .build();
+                qrCodeService.save(record);
+
+                results.add(new StudentQrCodeDTO(childName, behaviour, base64));
             }
         }
 

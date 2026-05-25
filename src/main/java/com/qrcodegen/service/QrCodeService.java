@@ -31,8 +31,12 @@ public class QrCodeService {
         return repository.findById(id);
     }
 
-    public List<QrCode> findByLabel(String label) {
-        return repository.findByLabel(label);
+    public List<QrCode> findByChildName(String childName) {
+        return repository.findByChildName(childName);
+    }
+
+    public List<QrCode> findByBehaviour(String behaviour) {
+        return repository.findByBehaviour(behaviour);
     }
 
     public QrCode save(QrCode qrCode) {
