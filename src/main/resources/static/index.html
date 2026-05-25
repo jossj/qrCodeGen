@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #1a73e8;
+      color: #fff;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+    header h1 { font-size: 1.4rem; font-weight: 600; }
+
+    /* ── Main layout ── */
+    main { max-width: 1280px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    /* ── Upload card ── */
+    .upload-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .upload-card h2 { font-size: 1.1rem; color: #555; margin-bottom: 1.5rem; font-weight: 500; }
+
+    .upload-area {
+      border: 2px dashed #1a73e8;
+      border-radius: 10px;
+      padding: 2rem 1.5rem;
+      cursor: pointer;
+      transition: background .2s;
+      margin-bottom: 1.25rem;
+    }
+    .upload-area:hover { background: #f0f6ff; }
+    .upload-icon { font-size: 2.5rem; margin-bottom: .5rem; }
+    .upload-area p { color: #666; font-size: .95rem; }
+    .upload-area p span { color: #1a73e8; font-weight: 600; }
+
+    #fileInput { display: none; }
+
+    .btn-row { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+    .btn {
+      padding: .7rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: background .2s, opacity .2s;
+    }
+    .btn-primary { background: #1a73e8; color: #fff; }
+    .btn-primary:hover { background: #1557b0; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-secondary { background: #e8eaed; color: #444; }
+    .btn-secondary:hover { background: #d2d5da; }
+
+    #fileName { color: #555; font-size: .9rem; }
+
+    /* ── Status banner ── */
+    #status {
+      display: none;
+      padding: .85rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      font-size: .95rem;
+      font-weight: 500;
+    }
+    #status.loading { background: #e8f0fe; color: #1a73e8; }
+    #status.error   { background: #fce8e6; color: #c5221f; }
+    #status.success { background: #e6f4ea; color: #137333; }
+
+    /* ── Summary bar ── */
+    #summary {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    #summary span { font-size: .95rem; color: #555; }
+    #printBtn { font-size: .875rem; padding: .5rem 1.25rem; }
+
+    /* ── QR grid ── */
+    #qrGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .qr-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.5rem 1rem 1.25rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .qr-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.1); }
+
+    .qr-card img {
+      width: 160px;
+      height: 160px;
+      display: block;
+      margin: 0 auto 1rem;
+      border-radius: 6px;
+    }
+    .qr-card .student-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: .3rem;
+      word-break: break-word;
+    }
+    .qr-card .badge {
+      display: inline-block;
+      background: #e8f0fe;
+      color: #1a73e8;
+      font-size: .78rem;
+      font-weight: 600;
+      padding: .25rem .75rem;
+      border-radius: 20px;
+      margin-top: .25rem;
+      word-break: break-word;
+    }
+
+    /* ── Empty state ── */
+    #emptyState {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #888;
+    }
+    #emptyState .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    @media print {
+      header, .upload-card, #status, #summary { display: none !important; }
+      body { background: #fff; }
+      .qr-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:1.6rem">&#x25a6;</span>
+  <h1>QR Code Dashboard</h1>
+</header>
+
+<main>
+
+  <!-- Upload card -->
+  <div class="upload-card">
+    <h2>Upload a spreadsheet containing <strong>Student Name</strong> and <strong>BehaviourType</strong> columns</h2>
+
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">&#128196;</div>
+      <p><span>Choose an Excel file</span> or drag and drop it here</p>
+      <p style="font-size:.8rem;margin-top:.4rem;color:#999">.xlsx or .xls</p>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" />
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="browseBtn">Browse</button>
+      <button class="btn btn-primary" id="generateBtn" disabled>Generate QR Codes</button>
+      <span id="fileName">No file selected</span>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div id="status"></div>
+
+  <!-- Summary + print -->
+  <div id="summary">
+    <span id="countLabel"></span>
+    <button class="btn btn-secondary" id="printBtn" onclick="window.print()">&#128424; Print</button>
+  </div>
+
+  <!-- Cards grid -->
+  <div id="qrGrid"></div>
+
+  <!-- Empty state (shown on upload with no rows) -->
+  <div id="emptyState">
+    <div class="empty-icon">&#128203;</div>
+    <p>No student records found in the uploaded file.</p>
+  </div>
+
+</main>
+
+<script>
+  const fileInput   = document.getElementById('fileInput');
+  const browseBtn   = document.getElementById('browseBtn');
+  const generateBtn = document.getElementById('generateBtn');
+  const fileNameEl  = document.getElementById('fileName');
+  const uploadArea  = document.getElementById('uploadArea');
+  const statusEl    = document.getElementById('status');
+  const qrGrid      = document.getElementById('qrGrid');
+  const summary     = document.getElementById('summary');
+  const countLabel  = document.getElementById('countLabel');
+  const emptyState  = document.getElementById('emptyState');
+
+  // Open file picker
+  browseBtn.addEventListener('click', () => fileInput.click());
+  uploadArea.addEventListener('click', () => fileInput.click());
+
+  // Drag-and-drop
+  uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.background = '#e8f4ff'; });
+  uploadArea.addEventListener('dragleave', () => { uploadArea.style.background = ''; });
+  uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.style.background = '';
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) setFile(dropped);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFile(fileInput.files[0]);
+  });
+
+  function setFile(f) {
+    fileInput._selectedFile = f;
+    fileNameEl.textContent  = f.name;
+    generateBtn.disabled    = false;
+    clearResults();
+    setStatus('');
+  }
+
+  generateBtn.addEventListener('click', uploadFile);
+
+  async function uploadFile() {
+    const file = fileInput._selectedFile || fileInput.files[0];
+    if (!file) return;
+
+    generateBtn.disabled = true;
+    clearResults();
+    setStatus('Generating QR codes…', 'loading');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/dashboard/upload', { method: 'POST', body: formData });
+
+      if (res.status === 400) {
+        setStatus('Could not find "Student Name" and "BehaviourType" columns. Please check your spreadsheet headers.', 'error');
+        generateBtn.disabled = false;
+        return;
+      }
+      if (!res.ok) {
+        setStatus('Server error (' + res.status + '). Please try again.', 'error');
+        generateBtn.disabled = false;
+        return;
+      }
+
+      const students = await res.json();
+      setStatus('');
+
+      if (students.length === 0) {
+        emptyState.style.display = 'block';
+      } else {
+        renderCards(students);
+        countLabel.textContent = students.length + ' QR code' + (students.length !== 1 ? 's' : '') + ' generated';
+        summary.style.display  = 'flex';
+        setStatus(students.length + ' QR code' + (students.length !== 1 ? 's' : '') + ' generated successfully.', 'success');
+      }
+    } catch (err) {
+      setStatus('Network error: ' + err.message, 'error');
+    } finally {
+      generateBtn.disabled = false;
+    }
+  }
+
+  function renderCards(students) {
+    students.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'qr-card';
+      card.innerHTML = `
+        <img src="data:image/png;base64,${s.qrCodeBase64}" alt="QR code for ${esc(s.studentName)}" />
+        <div class="student-name">${esc(s.studentName)}</div>
+        <span class="badge">${esc(s.behaviourType)}</span>
+      `;
+      qrGrid.appendChild(card);
+    });
+  }
+
+  function clearResults() {
+    qrGrid.innerHTML       = '';
+    summary.style.display  = 'none';
+    emptyState.style.display = 'none';
+  }
+
+  function setStatus(msg, type) {
+    if (!msg) { statusEl.style.display = 'none'; return; }
+    statusEl.textContent  = msg;
+    statusEl.className    = type;
+    statusEl.style.display = 'block';
+  }
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+
+</body>
+</html>
